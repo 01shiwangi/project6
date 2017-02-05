@@ -5,6 +5,11 @@
  */
 package generic;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -13,6 +18,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * REST Web Service
@@ -31,15 +38,41 @@ public class GenericResource {
     public GenericResource() {
     }
 
-    /**
-     * Retrieves representation of an instance of generic.GenericResource
-     * @return an instance of java.lang.String
-     */
+    @Path("listofbuildings")
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public String getXml() {
-        //TODO return proper representation object
-        throw new UnsupportedOperationException();
+    public String listofbuildings() throws ClassNotFoundException, SQLException {
+    
+    JSONObject main=new JSONObject();
+    
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+        
+        String sql="select * from p6building";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        JSONArray buildinglist = new JSONArray();
+        while(myresult.next())
+        {
+            JSONObject buildinglistobj=new JSONObject();
+            
+            int building_id=myresult.getInt("building_id");
+            buildinglistobj.accumulate("Building_Id", building_id);
+            System.out.print(building_id);
+        }
+        
+        
+        
+        
+        
+        
+        String abc = main.toString();
+        return abc;
     }
 
    
