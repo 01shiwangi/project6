@@ -220,5 +220,81 @@ public class GenericResource {
     
     
     
+    @Path("listofdepartments")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofdepartments() throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6department";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        JSONArray departmentlist = new JSONArray();
+        while (myresult.next()) {
+            JSONObject departmentlistobj = new JSONObject();
+
+            int department_id = myresult.getInt("department_id");
+            departmentlistobj.accumulate("Department_id", department_id);
+
+            String department_abbv=myresult.getString("department_abbv");
+            departmentlistobj.accumulate("Department_abbv", department_abbv);
+
+            departmentlist.add(departmentlistobj);
+        }
+
+        main.accumulate("Department_List", departmentlist);
+
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    @Path("departmentdetail&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String departmentdetail(@PathParam ("param1") int did) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6department where department_id="+did;
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Department_Id", did);
+        
+        while (myresult.next()) {
+
+            int department_id = myresult.getInt("department_id");
+            main.accumulate("Department_id", department_id);
+
+            String department_name=myresult.getString("department_name");
+            main.accumulate("Department_name", department_name);
+            
+            String department_abbv=myresult.getString("department_abbv");
+            main.accumulate("Department_abbv", department_abbv);
+            
+        }
+        
+        String abc = main.toString();
+        return abc;
+    }
     
 }
