@@ -12,7 +12,7 @@ import javax.ws.rs.core.Application;
  *
  * @author John
  */
-@javax.ws.rs.ApplicationPath("webresources")
+@javax.ws.rs.ApplicationPath("mobile")
 public class ApplicationConfig extends Application {
 
     @Override
