@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author John
  */
-@Path("mobile")
+@Path("project6")
 public class GenericResource {
 
     @Context
