@@ -282,9 +282,6 @@ public class GenericResource {
         
         while (myresult.next()) {
 
-            int department_id = myresult.getInt("department_id");
-            main.accumulate("Department_id", department_id);
-
             String department_name=myresult.getString("department_name");
             main.accumulate("Department_name", department_name);
             
@@ -296,5 +293,496 @@ public class GenericResource {
         String abc = main.toString();
         return abc;
     }
+    
+    
+    
+    @Path("listofitems")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitems() throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        JSONArray itemlist = new JSONArray();
+        while (myresult.next()) {
+            JSONObject itemlistobj = new JSONObject();
+
+            int item_id = myresult.getInt("item_id");
+            itemlistobj.accumulate("Item_id", item_id);
+
+            String item_name=myresult.getString("item_name");
+            itemlistobj.accumulate("Item_name", item_name);
+
+            String status=myresult.getString("status");
+            itemlistobj.accumulate("Status", status);
+            
+            itemlist.add(itemlistobj);
+        }
+
+        main.accumulate("Item_List", itemlist);
+
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    @Path("itemdetailbyid&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String itemdetailbyid(@PathParam ("param1") int iid) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item where item_id="+iid;
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Item_Id", iid);
+        
+        while (myresult.next()) {
+
+            String item_name=myresult.getString("item_name");
+            main.accumulate("Item_name", item_name);
+            
+            String item_description=myresult.getString("item_description");
+            main.accumulate("Item_description", item_description);
+            
+            String model=myresult.getString("model");
+            main.accumulate("Model", model);
+            
+            String status=myresult.getString("status");
+            main.accumulate("Status_of_item", status);
+            
+        }
+        
+        Statement mystmt2 = mycon.createStatement();
+        String sql2 = "select c.category_name from p6item i, p6itemcategory c where c.category_id=i.category_id and i.item_id="+iid;
+        ResultSet myresult2 = mystmt2.executeQuery(sql2);
+        
+        while(myresult2.next())
+        {
+            String category_name=myresult2.getString("category_name");
+            main.accumulate("Category_name", category_name);
+        }
+        
+        Statement mystmt3 = mycon.createStatement();
+        String sql3 = "select b.brand_name from p6item i, p6brand b where b.brand_id=i.brand_id and i.item_id="+iid;
+        ResultSet myresult3 = mystmt3.executeQuery(sql3);
+        
+        while(myresult3.next())
+        {
+            String brand_name=myresult3.getString("brand_name");
+            main.accumulate("Brand_name", brand_name);
+        }
+        
+        Statement mystmt4 = mycon.createStatement();
+        String sql4 = "select b.building_name from p6item i, p6location l, p6building b where l.location_id=i.location_id and b.building_id=l.building_id and i.item_id="+iid;
+        ResultSet myresult4 = mystmt3.executeQuery(sql4);
+        
+        while(myresult4.next())
+        {
+            String building_name=myresult4.getString("building_name");
+            main.accumulate("Building_name", building_name);
+        }
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    @Path("listofitembybuilding&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitembybuilding(@PathParam ("param1") String bname) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item i, p6location l, p6building b where l.location_id=i.location_id and b.building_id=l.building_id and b.building_name='"+bname+"'";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Building_name", bname);
+        
+        JSONArray itemlist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject itemlistobj=new JSONObject();
+            
+            int item_id=myresult.getInt("item_id");
+            itemlistobj.accumulate("Item_id", item_id);
+
+            String item_name=myresult.getString("item_name");
+            itemlistobj.accumulate("Item_name", item_name);
+            
+            String status=myresult.getString("status");
+            itemlistobj.accumulate("Status_of_item", status);
+            
+            itemlist.add(itemlistobj);
+            
+        }
+        
+        main.accumulate("Item_list", itemlist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    @Path("listofitembybrand&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitembybrand(@PathParam ("param1") String bname) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item i, p6brand b where b.brand_id=i.brand_id and b.brand_name='"+bname+"'";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Brand_name", bname);
+        
+        JSONArray itemlist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject itemlistobj=new JSONObject();
+            
+            int item_id=myresult.getInt("item_id");
+            itemlistobj.accumulate("Item_id", item_id);
+
+            String item_name=myresult.getString("item_name");
+            itemlistobj.accumulate("Item_name", item_name);
+            
+            String status=myresult.getString("status");
+            itemlistobj.accumulate("Status_of_item", status);
+            
+            itemlist.add(itemlistobj);
+            
+        }
+        
+        main.accumulate("Item_list", itemlist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    @Path("listofitembycategory&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitembycategory(@PathParam ("param1") String cname) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item i, p6itemcategory c where c.category_id=i.category_id and c.category_name='"+cname+"'";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Category_name", cname);
+        
+        JSONArray itemlist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject itemlistobj=new JSONObject();
+            
+            int item_id=myresult.getInt("item_id");
+            itemlistobj.accumulate("Item_id", item_id);
+
+            String item_name=myresult.getString("item_name");
+            itemlistobj.accumulate("Item_name", item_name);
+            
+            String status=myresult.getString("status");
+            itemlistobj.accumulate("Status_of_item", status);
+            
+            itemlist.add(itemlistobj);
+            
+        }
+        
+        main.accumulate("Item_list", itemlist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    
+    @Path("listofitembydescription&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitembydescription(@PathParam ("param1") String desc) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6item where item_description='"+desc+"'";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Item_description", desc);
+        
+        JSONArray itemlist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject itemlistobj=new JSONObject();
+            
+            int item_id=myresult.getInt("item_id");
+            itemlistobj.accumulate("Item_id", item_id);
+
+            String item_name=myresult.getString("item_name");
+            itemlistobj.accumulate("Item_name", item_name);
+            
+            String status=myresult.getString("status");
+            itemlistobj.accumulate("Status_of_item", status);
+            
+            itemlist.add(itemlistobj);
+            
+        }
+        
+        main.accumulate("Item_list", itemlist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    
+    @Path("listofitemcategory")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofitemcategory() throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6itemcategory";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        JSONArray categorylist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject categorylistobj=new JSONObject();
+            
+            int category_id=myresult.getInt("category_id");
+            categorylistobj.accumulate("Category_id", category_id);
+
+            String category_name=myresult.getString("category_name");
+            categorylistobj.accumulate("Category_name", category_name);
+            
+            int nbitems=myresult.getInt("nbitems");
+            categorylistobj.accumulate("NBItems", nbitems);
+            
+            categorylist.add(categorylistobj);
+            
+        }
+        
+        main.accumulate("Category_list", categorylist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    
+    @Path("itemcategorydetail&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String itemcategorydetail(@PathParam ("param1") int cid) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6itemcategory where category_id="+cid;
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Category_id", cid);
+        
+        while (myresult.next()) {
+            
+            String category_name=myresult.getString("category_name");
+            main.accumulate("Category_name", category_name);
+            
+            String description=myresult.getString("description");
+            main.accumulate("Description", description);
+            
+        }
+        
+        Statement mystmt2 = mycon.createStatement();
+        String sql2 = "Select i.CATEGORY_ID, count(i.item_id) from p6itemcategory c, p6item i where c.CATEGORY_ID=i.CATEGORY_ID and c.category_id="+cid+" group by i.category_ID";
+        ResultSet myresult2 = mystmt2.executeQuery(sql2);
+        
+        while(myresult2.next())
+        {
+            int nbitems=myresult2.getInt("count(i.item_id)");
+            main.accumulate("NBItems", nbitems);
+        }
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    
+    @Path("listofsoftwares")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listofsoftwares() throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6software";
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        JSONArray softwarelist=new JSONArray();
+        
+        while (myresult.next()) {
+            
+            JSONObject softwarelistobj=new JSONObject();
+            
+            int software_id=myresult.getInt("software_id");
+            softwarelistobj.accumulate("Software_id", software_id);
+
+            String software_name=myresult.getString("software_name");
+            softwarelistobj.accumulate("Software_name", software_name);
+            
+            String version=myresult.getString("version");
+            softwarelistobj.accumulate("Version", version);
+            
+            softwarelist.add(softwarelistobj);
+            
+        }
+        
+        main.accumulate("Software_list", softwarelist);
+        
+        String abc = main.toString();
+        return abc;
+    }
+    
+    
+    
+    
+    @Path("softwaredetail&{param1}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String softwaredetail(@PathParam ("param1") int sid) throws ClassNotFoundException, SQLException {
+
+        JSONObject main = new JSONObject();
+
+        main.accumulate("Status", "OK");
+
+        long ut = System.currentTimeMillis() / 1000L;
+        main.accumulate("Timestamp", ut);
+
+        Class.forName("oracle.jdbc.OracleDriver");
+        Connection mycon = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "hr", "cegepgim");
+        Statement mystmt = mycon.createStatement();
+
+        String sql = "select * from p6software where software_id="+sid;
+        ResultSet myresult = mystmt.executeQuery(sql);
+        
+        main.accumulate("Software_Id", sid);
+        
+        while (myresult.next()) {
+            
+            String software_name=myresult.getString("software_name");
+            main.accumulate("Software_name", software_name);
+            
+            String license_key=myresult.getString("license_key");
+            main.accumulate("License_key", license_key);
+            
+            String version=myresult.getString("version");
+            main.accumulate("Version", version);
+            
+        }
+        
+        String abc = main.toString();
+        return abc;
+    } 
     
 }
