@@ -948,8 +948,8 @@ public class GenericResource {
             String username=myresult.getString("username");
             userlistobj.accumulate("Username", username);
             
-            String user_mail=myresult.getString("user_mail");
-            userlistobj.accumulate("User_mail", user_mail);
+            String user_email=myresult.getString("user_email");
+            userlistobj.accumulate("User_email", user_email);
             
 
             userlist.add(userlistobj);
@@ -990,14 +990,23 @@ public class GenericResource {
             String username=myresult.getString("username");
             main.accumulate("Username", username);
             
+            String first_name=myresult.getString("first_name");
+            main.accumulate("First_name", first_name);
+            
+            String last_name=myresult.getString("last_name");
+            main.accumulate("Last_name", last_name);
+            
             String user_address=myresult.getString("user_address");
             main.accumulate("User_address", user_address);
             
             String user_phone=myresult.getString("user_phone");
             main.accumulate("User_phone", user_phone);
             
-            String user_mail=myresult.getString("user_mail");
-            main.accumulate("User_mail", user_mail);
+            String user_email=myresult.getString("user_email");
+            main.accumulate("User_email", user_email);
+            
+            String password=myresult.getString("password");
+            main.accumulate("Password", password);
             
         }
 
